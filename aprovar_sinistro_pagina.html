@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprovação de Sinistro - Viação Alvorada</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            padding: 40px 0; 
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            margin-bottom: 20px;
+        }
+        .logo {
+            max-width: 200px;
+            margin-bottom: 20px;
+        }
+        .btn-lg {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-center mb-4">
+            <img src="https://raw.githubusercontent.com/seu-usuario/seu-repositorio/main/logo.png" alt="Viação Alvorada" class="logo" id="logo-img">
+            <h1>Sistema de Gestão de Sinistros</h1>
+            <p class="lead">Aprovação de Sinistro</p>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Detalhes do Sinistro <span id="pmo"></span></h4>
+            </div>
+            <div class="card-body">
+                <div id="loading" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2">Carregando detalhes do sinistro...</p>
+                </div>
+                
+                <div id="error-message" class="alert alert-danger d-none" role="alert">
+                    Ocorreu um erro ao carregar os detalhes do sinistro.
+                </div>
+                
+                <div id="sinistro-details" class="d-none">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>PMO:</strong> <span id="pmo-value"></span></p>
+                            <p><strong>Data:</strong> <span id="data-value"></span></p>
+                            <p><strong>Local:</strong> <span id="local-value"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Viatura:</strong> <span id="viatura-value"></span></p>
+                            <p><strong>Condutor:</strong> <span id="condutor-value"></span></p>
+                            <p><strong>Total:</strong> <span id="total-value" class="text-primary fw-bold"></span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Descrição da Ocorrência:</h5>
+                        <p id="descricao-value"></p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Descrição dos Danos:</h5>
+                        <p id="danos-value"></p>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <p class="fw-bold">Por favor, indique sua decisão:</p>
+                        <button id="btn-aprovar" class="btn btn-success btn-lg">
+                            <i class="fas fa-check me-2"></i> APROVAR
+                        </button>
+                        <button id="btn-rejeitar" class="btn btn-danger btn-lg">
+                            <i class="fas fa-times me-2"></i> REJEITAR
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="result-message" class="alert d-none mt-4" role="alert"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar logo padrão caso não exista no GitHub
+            const logoImg = document.getElementById('logo-img');
+            logoImg.onerror = function() {
+                // Caso a imagem não seja encontrada no GitHub, usar um placeholder
+                this.src = 'https://via.placeholder.com/200x100?text=Via%C3%A7%C3%A3o+Alvorada';
+            };
+            
+            // Obter ID do sinistro da URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const sinistroId = urlParams.get('id');
+            
+            if (!sinistroId) {
+                document.getElementById('loading').classList.add('d-none');
+                document.getElementById('error-message').classList.remove('d-none');
+                document.getElementById('error-message').textContent = 'ID do sinistro não fornecido.';
+                return;
+            }
+            
+            // URL do sistema (substitua pelo seu IP ou domínio)
+            // IMPORTANTE: Altere este valor para o URL correto do seu sistema
+            const apiUrl = 'http://localhost/sinistros';
+            
+            // Carregar detalhes do sinistro
+            fetch(`${apiUrl}/obter_sinistro.php?id=${sinistroId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.erro) {
+                        throw new Error(data.erro);
+                    }
+                    
+                    // Preencher detalhes do sinistro
+                    document.getElementById('pmo').textContent = data.pmo;
+                    document.getElementById('pmo-value').textContent = data.pmo;
+                    document.getElementById('data-value').textContent = data.data;
+                    document.getElementById('local-value').textContent = data.local;
+                    document.getElementById('viatura-value').textContent = data.viatura;
+                    document.getElementById('condutor-value').textContent = data.condutor;
+                    document.getElementById('total-value').textContent = data.total;
+                    document.getElementById('descricao-value').textContent = data.descricao;
+                    document.getElementById('danos-value').textContent = data.danos;
+                    
+                    // Mostrar detalhes
+                    document.getElementById('loading').classList.add('d-none');
+                    document.getElementById('sinistro-details').classList.remove('d-none');
+                })
+                .catch(error => {
+                    document.getElementById('loading').classList.add('d-none');
+                    document.getElementById('error-message').classList.remove('d-none');
+                    document.getElementById('error-message').textContent = 'Erro: ' + error.message;
+                });
+            
+            // Configurar botões de ação
+            document.getElementById('btn-aprovar').addEventListener('click', function() {
+                processarAcao('aprovar');
+            });
+            
+            document.getElementById('btn-rejeitar').addEventListener('click', function() {
+                processarAcao('rejeitar');
+            });
+            
+            // Função para processar ação
+            function processarAcao(acao) {
+                // Desabilitar botões
+                document.getElementById('btn-aprovar').disabled = true;
+                document.getElementById('btn-rejeitar').disabled = true;
+                
+                // Mostrar mensagem de processamento
+                const resultMessage = document.getElementById('result-message');
+                resultMessage.classList.remove('d-none', 'alert-success', 'alert-danger');
+                resultMessage.classList.add('alert-info');
+                resultMessage.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processando...';
+                
+                // Enviar ação para o sistema
+                fetch(`${apiUrl}/atualizar_status.php?id=${sinistroId}&acao=${acao}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        resultMessage.classList.remove('alert-info');
+                        
+                        if (data.sucesso) {
+                            resultMessage.classList.add('alert-success');
+                            resultMessage.innerHTML = `<i class="fas fa-check-circle me-2"></i> ${data.mensagem}`;
+                        } else {
+                            resultMessage.classList.add('alert-danger');
+                            resultMessage.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i> Erro: ${data.mensagem}`;
+                            
+                            // Reativar botões em caso de erro
+                            document.getElementById('btn-aprovar').disabled = false;
+                            document.getElementById('btn-rejeitar').disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        resultMessage.classList.remove('alert-info');
+                        resultMessage.classList.add('alert-danger');
+                        resultMessage.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i> Erro de comunicação: ${error.message}`;
+                        
+                        // Reativar botões em caso de erro
+                        document.getElementById('btn-aprovar').disabled = false;
+                        document.getElementById('btn-rejeitar').disabled = false;
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
