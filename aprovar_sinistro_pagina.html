@@ -121,8 +121,8 @@
             // URL do sistema (substitua pelo seu IP ou domínio)
             // IMPORTANTE: Este valor deve apontar para seu servidor local
             const apiUrl = window.location.hostname === 'galheta27.github.io' 
-                ? 'http://localhost/sinistros' // Quando acessado via GitHub Pages
-                : 'http://localhost/sinistros'; // Quando acessado localmente
+                ? 'http://localhost/Sinistros' // Quando acessado via GitHub Pages
+                : 'http://localhost/Sinistros'; // Quando acessado localmente
             
             // Carregar detalhes do sinistro
             fetch(`${apiUrl}/obter_sinistro.php?id=${sinistroId}`)
